@@ -512,6 +512,43 @@ export function useAdmin() {
     []
   );
 
+  const deleteItem = useCallback(
+    async (itemId: string, adminId: string, reason?: string): Promise<void> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // 1. Audit log before deletion
+        await supabase.from('audit_logs').insert({
+          action: 'item_deleted',
+          performed_by: adminId,
+          entity_type: 'item',
+          entity_id: itemId,
+          details: {
+            reason: reason || 'Deleted by campus admin',
+          },
+        });
+
+        // 2. Delete item
+        const { error: deleteError } = await supabase
+          .from('items')
+          .delete()
+          .eq('id', itemId);
+
+        if (deleteError) {
+          throw new Error(deleteError.message);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to delete item';
+        setError(message);
+        throw new Error(message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
   return {
     loading,
     error,
@@ -523,5 +560,6 @@ export function useAdmin() {
     approveClaim,
     rejectClaim,
     confirmHandover,
+    deleteItem,
   };
 }

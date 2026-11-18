@@ -336,6 +336,12 @@ CREATE POLICY "items: admins can update any"
   TO authenticated
   USING (public.is_admin());
 
+-- Admins can delete any item (lost notices or found items)
+CREATE POLICY "items: admins can delete any"
+  ON public.items FOR DELETE
+  TO authenticated
+  USING (public.is_admin());
+
 -- ----------------------------------------------------------------------------
 -- claims policies
 -- ----------------------------------------------------------------------------

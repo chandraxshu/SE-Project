@@ -1,18 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAdmin } from '@/hooks/useAdmin';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Item } from '@/types';
 import { ITEM_CATEGORIES } from '@/types';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Pagination } from '@/components/ui/Pagination';
 import { Modal } from '@/components/ui/Modal';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Package, ExternalLink, Eye, MapPin, Calendar, User, Mail, Phone } from 'lucide-react';
+import { Package, ExternalLink, Eye, MapPin, Calendar, User, Mail, Phone, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export function AdminFoundItems() {
-  const { fetchAllItems, loading } = useAdmin();
+  const { fetchAllItems, deleteItem, loading } = useAdmin();
+  const { user } = useAuth();
 
   const [items, setItems] = useState<Item[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -23,6 +27,8 @@ export function AdminFoundItems() {
 
   // Modal inspection state
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const PAGE_SIZE = 15;
 
@@ -46,6 +52,24 @@ export function AdminFoundItems() {
   useEffect(() => {
     loadItems();
   }, [loadItems]);
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete || !user) return;
+    try {
+      setIsDeleting(true);
+      await deleteItem(itemToDelete.id, user.id, `Admin deletion of found item report: ${itemToDelete.title}`);
+      toast.success('Found item report deleted successfully');
+      setItemToDelete(null);
+      if (selectedItem?.id === itemToDelete.id) {
+        setSelectedItem(null);
+      }
+      loadItems();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete item');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
@@ -172,6 +196,14 @@ export function AdminFoundItems() {
                         >
                           <ExternalLink className="w-4 h-4 text-surface-500" />
                         </Link>
+                        <button
+                          type="button"
+                          onClick={() => setItemToDelete(item)}
+                          className="btn-ghost btn-sm text-xs p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          title="Delete Item"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -269,7 +301,16 @@ export function AdminFoundItems() {
               </div>
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-between items-center pt-4 border-t border-surface-200">
+              <button
+                type="button"
+                onClick={() => setItemToDelete(selectedItem)}
+                className="btn-danger btn-sm flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Delete Found Item
+              </button>
+
               <Link
                 to={`/admin/claims?search=${encodeURIComponent(selectedItem.title)}`}
                 className="btn-primary btn-sm"
@@ -280,6 +321,18 @@ export function AdminFoundItems() {
           </div>
         )}
       </Modal>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={Boolean(itemToDelete)}
+        onClose={() => setItemToDelete(null)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Found Item Report?"
+        message={`Are you sure you want to permanently delete the found item report "${itemToDelete?.title}"? Any associated claims will also be removed. This action cannot be undone and will be permanently recorded in the campus audit log.`}
+        confirmLabel="Yes, Delete Item"
+        variant="danger"
+        loading={isDeleting}
+      />
     </div>
   );
 }

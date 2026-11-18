@@ -1,18 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAdmin } from '@/hooks/useAdmin';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Item } from '@/types';
 import { ITEM_CATEGORIES } from '@/types';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Pagination } from '@/components/ui/Pagination';
 import { Modal } from '@/components/ui/Modal';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { AlertCircle, ExternalLink, Eye, MapPin, Calendar, User } from 'lucide-react';
+import { AlertCircle, ExternalLink, Eye, MapPin, Calendar, User, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export function AdminLostItems() {
-  const { fetchAllItems, loading } = useAdmin();
+  const { fetchAllItems, deleteItem, loading } = useAdmin();
+  const { user } = useAuth();
 
   const [items, setItems] = useState<Item[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -22,6 +26,8 @@ export function AdminLostItems() {
   const [page, setPage] = useState(1);
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const PAGE_SIZE = 15;
 
@@ -45,6 +51,24 @@ export function AdminLostItems() {
   useEffect(() => {
     loadItems();
   }, [loadItems]);
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete || !user) return;
+    try {
+      setIsDeleting(true);
+      await deleteItem(itemToDelete.id, user.id, `Admin deletion of lost item notice: ${itemToDelete.title}`);
+      toast.success('Lost report deleted successfully');
+      setItemToDelete(null);
+      if (selectedItem?.id === itemToDelete.id) {
+        setSelectedItem(null);
+      }
+      loadItems();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete report');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
@@ -170,6 +194,14 @@ export function AdminLostItems() {
                         >
                           <ExternalLink className="w-4 h-4 text-surface-500" />
                         </Link>
+                        <button
+                          type="button"
+                          onClick={() => setItemToDelete(item)}
+                          className="btn-ghost btn-sm text-xs p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          title="Delete Report"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -265,9 +297,31 @@ export function AdminLostItems() {
                 </div>
               </div>
             </div>
+            <div className="pt-4 border-t border-surface-200 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setItemToDelete(selectedItem)}
+                className="btn-danger btn-sm flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Delete Lost Notice
+              </button>
+            </div>
           </div>
         )}
       </Modal>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={Boolean(itemToDelete)}
+        onClose={() => setItemToDelete(null)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Lost Item Report?"
+        message={`Are you sure you want to permanently delete the lost item notice "${itemToDelete?.title}"? This action cannot be undone and will be permanently recorded in the campus audit log.`}
+        confirmLabel="Yes, Delete Report"
+        variant="danger"
+        loading={isDeleting}
+      />
     </div>
   );
 }
