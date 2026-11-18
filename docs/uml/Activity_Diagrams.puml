@@ -1,0 +1,77 @@
+@startuml
+title Khoj — IIITA Lost & Found: Key Workflow Activity Diagrams
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+|Student Finder|
+start
+:Find an item on campus;
+:Sign in using verified @iiita.ac.in account;
+:Open "Report a Found Item" form;
+:Fill details (title, category, location, date);
+:Attach photograph of the item;
+if (Is file <= 5MB and valid image type?) then (yes)
+  :Submit found item report;
+  |System|
+  :Upload photo to public bucket 'item-photos';
+  :Insert item record with status 'ACTIVE';
+  :Post item on Campus Noticeboard;
+  |Student Finder|
+  :Receive confirmation and view item listing;
+  stop
+else (no)
+  :Display file validation error;
+  stop
+endif
+
+|Claimant Student|
+start
+:Browse noticeboard or search keywords;
+:Identify lost belonging;
+:Click "Claim This Item";
+:Provide ownership explanation and secret proof marks;
+:Attach invoice / proof picture (optional);
+:Submit claim;
+|System|
+:Check UNIQUE(item_id, claimant_id);
+:Upload proof to private bucket 'claim-evidence';
+:Insert claim with status 'PENDING_REVIEW';
+:Send alert notification to Finder;
+|Campus Administrator|
+:Open Admin Claims Desk;
+:Inspect claimant profile & confidential proof dossier;
+if (Is proof valid and authentic?) then (yes)
+  :Approve claim;
+  |System|
+  :Set claim status to 'AWAITING_HANDOVER';
+  :Set item status to 'CLAIMED';
+  :Reject competing pending claims for same item;
+  :Insert record in audit_logs;
+  :Notify claimant to visit desk;
+else (no)
+  |Campus Administrator|
+  :Reject claim with explanation;
+  |System|
+  :Set claim status to 'REJECTED';
+  :Insert record in audit_logs;
+  :Notify claimant of rejection;
+  stop
+endif
+
+|Claimant Student|
+:Visit Administrative / Security Desk with physical IIITA ID;
+|Campus Administrator|
+:Verify student ID card and roll number;
+:Click "Confirm Physical Handover";
+:Input verified recipient name and roll number;
+|System|
+:Set claim status to 'RETURNED';
+:Set item status to 'RETURNED';
+:Write permanent handover audit record;
+:Dispatch completion notifications;
+|Claimant Student|
+:Take custody of item;
+stop
+
+@enduml

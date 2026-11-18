@@ -1,0 +1,49 @@
+@startuml
+title Sequence Diagram: Claim Review, Approval & Physical Handover
+
+autonumber
+actor "Campus Administrator" as Admin
+participant "Admin Portal\n(AdminClaims / Handovers)" as UI
+participant "PostgreSQL DB" as DB
+actor "Claimant Student" as Claimant
+actor "Student Finder" as Finder
+
+== Stage 1: Administrative Claim Review ==
+Admin -> UI: Open /admin/claims -> Select pending claim
+UI -> DB: Query claim joined with claimant profile and item
+DB --> UI: Return claimant roll, name, proof details & evidence photo
+Admin -> Admin: Cross-examine proof with physical item
+
+alt Claim Approved
+    Admin -> UI: Click "Approve Claim" + enter review note
+    UI -> DB: UPDATE claims SET status='awaiting_handover', reviewed_by=admin.id WHERE id = claim.id
+    UI -> DB: UPDATE items SET status='claimed' WHERE id = claim.item_id
+    UI -> DB: UPDATE claims SET status='rejected' WHERE item_id = claim.item_id AND id != claim.id (Reject competing claims)
+    UI -> DB: INSERT into audit_logs (action='claim_approved', performed_by=admin.id, entity_type='claim')
+    UI -> DB: INSERT into notifications (user_id=claimant.id, type='claim_approved', title='Claim Approved!')
+    DB --> Claimant: Notification: "Claim approved. Proceed to desk for handover."
+else Claim Rejected
+    Admin -> UI: Click "Reject Claim" + enter feedback message
+    UI -> DB: UPDATE claims SET status='rejected', admin_message=msg WHERE id = claim.id
+    UI -> DB: INSERT into audit_logs (action='claim_rejected', performed_by=admin.id, entity_type='claim')
+    UI -> DB: INSERT into notifications (user_id=claimant.id, type='claim_rejected')
+    DB --> Claimant: Notification: "Claim rejected."
+end
+
+== Stage 2: Physical Handover at Campus Desk ==
+Claimant -> Admin: Arrive at desk; present physical IIITA Student ID card
+Admin -> UI: Open /admin/handovers -> Click "Record Handover"
+Admin -> UI: Input verified Recipient Name & Roll Number
+Admin -> UI: Click "Confirm Physical Handover"
+
+UI -> DB: UPDATE claims SET status='returned', handover_confirmed_at=now(), recipient_roll_number=roll
+UI -> DB: UPDATE items SET status='returned'
+UI -> DB: INSERT into audit_logs (action='handover_confirmed', entity_type='claim', details={recipient_roll: roll})
+UI -> DB: INSERT into notifications (user_id=claimant.id, type='item_returned')
+UI -> DB: INSERT into notifications (user_id=finder.id, type='item_returned', title='Item Resolved')
+
+DB --> Claimant: Real-time notification: "Handover completed"
+DB --> Finder: Real-time notification: "Item you found has been returned"
+UI --> Admin: Handover finalized and saved in ledger
+
+@enduml

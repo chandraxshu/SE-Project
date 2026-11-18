@@ -1,0 +1,67 @@
+@startuml
+title Khoj — IIITA Lost & Found Platform: Deployment Diagram
+
+skinparam nodeStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+node "Student Workstation / Mobile Device" as ClientDevice {
+  artifact "Web Browser (Chrome / Firefox / Safari)" as Browser {
+    component "Single Page Application (SPA)\nReact 19 + TypeScript Bundle" as SPA
+  }
+}
+
+node "Administrator Workstation" as AdminDevice {
+  artifact "Web Browser (Desktop)" as AdminBrowser {
+    component "Admin Operations UI\n(Audit & Handover Ledger)" as AdminSPA
+  }
+}
+
+node "Cloudflare Global Edge Network" as CFNetwork {
+  node "Cloudflare Pages (Static Hosting & CDN)" as CFPages {
+    file "index.html" as HTMLFile
+    file "assets/*.js (Vite Bundle)" as JSFile
+    file "assets/*.css (Tailwind)" as CSSFile
+    file "_routes.json / SPA Redirects" as RouteConfig
+  }
+}
+
+cloud "Google Cloud Platform" as GCP {
+  node "Google Identity Services" as GIS {
+    artifact "OAuth 2.0 Authorization Server\n(restricted to hd=iiita.ac.in)" as OAuthServer
+  }
+}
+
+cloud "Supabase Cloud Infrastructure (AWS ap-south-1 / Free Tier)" as SupaCloud {
+  node "API Gateway & Auth Proxy" as KongGateway {
+    artifact "GoTrue Daemon (Auth)" as GoTrueService
+    artifact "PostgREST (REST API)" as PostgrestEngine
+    artifact "Realtime (WebSockets)" as RealtimeEngine
+  }
+  
+  node "PostgreSQL 15+ Managed Cluster" as PGCluster {
+    database "iiita_khoj_db" as KhojDB {
+      artifact "Row Level Security (23 Policies)" as RLSEngine
+      artifact "Schema: profiles, items, claims,\nnotifications, audit_logs" as Tables
+    }
+  }
+  
+  node "Object Storage Cluster" as StorageCluster {
+    folder "item-photos (Public CDN)" as StoragePublic
+    folder "claim-evidence (Private S3 Encrypted)" as StoragePrivate
+  }
+}
+
+Browser -- CFPages : HTTPS GET / (Port 443)
+AdminBrowser -- CFPages : HTTPS GET /admin (Port 443)
+
+SPA --> OAuthServer : HTTPS OAuth Redirect
+AdminSPA --> OAuthServer : HTTPS OAuth Redirect
+
+SPA --> KongGateway : HTTPS REST / Realtime WSS (Port 443)
+AdminSPA --> KongGateway : HTTPS REST (Port 443)
+
+KongGateway --> KhojDB : SQL connection (internal)
+KongGateway --> StorageCluster : S3 API (internal)
+
+@enduml

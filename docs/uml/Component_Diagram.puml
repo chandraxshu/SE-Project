@@ -1,0 +1,97 @@
+@startuml
+title Khoj — IIITA Lost & Found Platform: Component Diagram
+
+skinparam componentStyle uml2
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+package "Client Layer (React + TypeScript + Vite)" {
+  [Routing Engine (React Router v7)] as Router
+  
+  package "Contexts & State" {
+    [AuthContext] as AuthCtx
+    [NotificationContext] as NotifCtx
+  }
+  
+  package "Custom Data Hooks" {
+    [useItems] as HookItems
+    [useClaims] as HookClaims
+    [useAdmin] as HookAdmin
+  }
+  
+  package "UI & Pages" {
+    [Public Noticeboard Pages\n(Home, Browse, Detail)] as PublicPages
+    [Reporting Forms\n(ReportFound, ReportLost)] as ReportPages
+    [Claim Desk Form\n(ClaimItemPage)] as ClaimPages
+    [Student Dashboard\n(DashboardPage)] as DashPage
+    [Admin Portal Module\n(Claims, Handovers, Users, Audit)] as AdminModule
+  }
+  
+  package "Services" {
+    [Supabase Client (lib/supabase)] as SupaClient
+    [Storage Service (services/storage)] as StorageSvc
+  }
+}
+
+package "Backend Cloud Services (Supabase & Google)" {
+  cloud "Google Identity" {
+    [Google OAuth 2.0 Provider] as GoogleOAuth
+  }
+  
+  cloud "Supabase Cloud Project" {
+    [GoTrue Auth Service] as GoTrue
+    [PostgREST API Engine] as PostgREST
+    [Realtime Engine] as RealtimeSvc
+    
+    database "PostgreSQL Database" {
+      [profiles Table] as DBProfiles
+      [items Table] as DBItems
+      [claims Table] as DBClaims
+      [notifications Table] as DBNotifs
+      [audit_logs Table] as DBAudits
+      [Row Level Security (RLS)] as RLS
+    }
+    
+    storage "Supabase Object Storage" {
+      folder "item-photos (Public)" as BucketPhotos
+      folder "claim-evidence (Private)" as BucketEvidence
+    }
+  }
+}
+
+Router --> PublicPages
+Router --> ReportPages
+Router --> ClaimPages
+Router --> DashPage
+Router --> AdminModule
+
+PublicPages --> HookItems
+ReportPages --> HookItems
+ClaimPages --> HookClaims
+DashPage --> HookItems
+DashPage --> HookClaims
+AdminModule --> HookAdmin
+
+AuthCtx --> SupaClient
+NotifCtx --> SupaClient
+HookItems --> SupaClient
+HookClaims --> SupaClient
+HookAdmin --> SupaClient
+HookItems --> StorageSvc
+HookClaims --> StorageSvc
+
+SupaClient --> GoTrue : Auth tokens
+SupaClient --> PostgREST : Data queries
+SupaClient --> RealtimeSvc : WebSocket subscriptions
+StorageSvc --> BucketPhotos
+StorageSvc --> BucketEvidence
+
+GoTrue --> GoogleOAuth : OAuth callback (hd=iiita.ac.in)
+PostgREST --> RLS : Authenticated UID
+RLS --> DBProfiles
+RLS --> DBItems
+RLS --> DBClaims
+RLS --> DBNotifs
+RLS --> DBAudits
+
+@enduml

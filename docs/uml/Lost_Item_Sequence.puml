@@ -1,0 +1,30 @@
+@startuml
+title Sequence Diagram: Reporting a Lost Item
+
+autonumber
+actor "Student Loser" as Student
+participant "ReportLostPage" as UI
+participant "Storage Service" as Storage
+participant "Supabase Storage\n('item-photos' bucket)" as Bucket
+participant "PostgreSQL DB\n(items table)" as DB
+
+Student -> UI: Fill title, category, description, last location, date lost
+Student -> UI: (Optional) Attach reference photograph or invoice
+UI -> UI: Validate form fields and file size
+
+Student -> UI: Click "Publish Lost Item Notice"
+UI -> DB: INSERT into items (title, category, report_type='lost', location, status='active', reported_by=auth.uid())
+DB --> UI: Return created item record (UUID)
+
+alt Reference Photo Provided
+    UI -> Storage: uploadItemPhoto(file, item.id)
+    Storage -> Bucket: Upload to item-photos bucket
+    Bucket --> Storage: Public URL
+    Storage --> UI: Return photo_url
+    UI -> DB: UPDATE items SET photo_url = url WHERE id = item.id
+    DB --> UI: Confirmed
+end
+
+UI -> Student: Display success message & show notice in Dashboard / Browse
+
+@enduml

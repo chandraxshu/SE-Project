@@ -1,0 +1,38 @@
+@startuml
+title Sequence Diagram: Submitting an Ownership Claim
+
+autonumber
+actor "Claimant Student" as Claimant
+participant "ClaimItemPage" as UI
+participant "Storage Service" as Storage
+participant "Supabase Storage\n(private 'claim-evidence')" as PrivBucket
+participant "PostgreSQL DB\n(claims & notifications)" as DB
+actor "Original Finder" as Finder
+
+Claimant -> UI: Open /items/:id/claim
+UI -> DB: Query existing claim for (item_id, claimant_id)
+DB --> UI: 0 rows (No prior active claim)
+
+Claimant -> UI: Enter claim message & secret distinguishing details
+Claimant -> UI: (Optional) Attach invoice or proof photo
+UI -> UI: Validate inputs
+
+Claimant -> UI: Click "Submit Claim for Review"
+UI -> DB: INSERT into claims (item_id, claimant_id, claim_message, proof_details, status='pending_review')
+DB --> UI: Return claim ID
+
+alt Proof Photo Provided
+    UI -> Storage: uploadClaimEvidence(file, claim.id)
+    Storage -> PrivBucket: Upload to encrypted private bucket
+    PrivBucket --> Storage: Path confirmed
+    Storage --> UI: Return private evidence URL
+    UI -> DB: UPDATE claims SET proof_photo_url = url WHERE id = claim.id
+    DB --> UI: Confirmed
+end
+
+UI -> DB: INSERT into notifications (user_id = item.reported_by, title="New Claim Filed", type="new_claim")
+DB --> Finder: Real-time notification delivered
+
+UI -> Claimant: Redirect to /dashboard with success toast: "Claim under review"
+
+@enduml

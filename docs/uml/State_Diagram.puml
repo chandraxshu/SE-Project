@@ -1,0 +1,53 @@
+@startuml
+title State Machine Diagram: Item Lifecycle & Claim Lifecycle
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+state "Item Lifecycle" as ItemState {
+  [*] --> Active : Reporter submits found/lost report
+  
+  Active : Item is publicly visible on noticeboard
+  Active : Available for student claims (if found)
+  
+  Active --> Claimed : Administrator approves a claim
+  Claimed : Item reserved for approved claimant
+  Claimed : Further claims blocked
+  
+  Claimed --> Returned : Admin confirms physical handover at desk
+  Returned : Item physically received by owner
+  Returned : Archived in permanent return ledger
+  
+  Active --> Archived : Admin archives expired or duplicate listing
+  Claimed --> Active : Approved claim revoked by admin
+  
+  Returned --> [*]
+  Archived --> [*]
+}
+
+--
+
+state "Claim Lifecycle" as ClaimState {
+  [*] --> PendingReview : Student submits ownership claim
+  
+  PendingReview : Awaiting administrative dossier review
+  PendingReview : Proof details kept confidential
+  
+  PendingReview --> Approved : Admin approves proof
+  Approved : Claim confirmed
+  
+  Approved --> AwaitingHandover : Automatically staged for physical collection
+  AwaitingHandover : Claimant instructed to visit security desk with ID
+  
+  PendingReview --> Rejected : Admin rejects due to insufficient proof
+  PendingReview --> Rejected : Automatically rejected when another claim is approved
+  Rejected : Review note provided to student
+  
+  AwaitingHandover --> Returned : Physical handover confirmed at desk
+  Returned : Recipient roll number recorded in audit log
+  
+  Rejected --> [*]
+  Returned --> [*]
+}
+
+@enduml

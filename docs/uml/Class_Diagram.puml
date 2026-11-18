@@ -1,0 +1,145 @@
+@startuml
+title Khoj — IIITA Lost & Found Platform: Domain Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+enum ReportType {
+  FOUND
+  LOST
+}
+
+enum ItemCategory {
+  ELECTRONICS
+  DOCUMENTS
+  WALLETS
+  KEYS
+  BOOKS
+  CLOTHING
+  BOTTLES
+  OTHER
+}
+
+enum ItemStatus {
+  ACTIVE
+  CLAIMED
+  RETURNED
+  ARCHIVED
+}
+
+enum ClaimStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  AWAITING_HANDOVER
+  RETURNED
+}
+
+enum NotificationType {
+  CLAIM_APPROVED
+  CLAIM_REJECTED
+  ADMIN_MESSAGE
+  ITEM_RETURNED
+  NEW_CLAIM
+  GENERAL
+}
+
+class Profile {
+  +UUID id
+  +String email
+  +String full_name
+  +String roll_number
+  +String department
+  +String academic_batch
+  +String phone
+  +String avatar_url
+  +UserRole role
+  +DateTime created_at
+  +DateTime updated_at
+  +Boolean isStudent()
+  +Boolean isAdmin()
+}
+
+class Item {
+  +UUID id
+  +String title
+  +ItemCategory category
+  +String description
+  +ReportType report_type
+  +String location
+  +Date date_occurred
+  +Time time_occurred
+  +String photo_url
+  +String distinguishing_details
+  +ItemStatus status
+  +UUID reported_by
+  +DateTime created_at
+  +DateTime updated_at
+  +Boolean isClaimable()
+  +void markClaimed()
+  +void markReturned()
+}
+
+class Claim {
+  +UUID id
+  +UUID item_id
+  +UUID claimant_id
+  +String claim_message
+  +String proof_details
+  +String proof_photo_url
+  +String location_lost
+  +Date date_lost
+  +ClaimStatus status
+  +UUID reviewed_by
+  +DateTime reviewed_at
+  +String review_note
+  +String admin_message
+  +DateTime handover_confirmed_at
+  +UUID handover_confirmed_by
+  +String recipient_name
+  +String recipient_roll_number
+  +DateTime created_at
+  +DateTime updated_at
+  +void approve(adminId, note)
+  +void reject(adminId, note, message)
+  +void completeHandover(adminId, name, roll)
+}
+
+class Notification {
+  +UUID id
+  +UUID user_id
+  +String title
+  +String message
+  +NotificationType type
+  +UUID related_item_id
+  +UUID related_claim_id
+  +Boolean is_read
+  +DateTime created_at
+  +void markAsRead()
+}
+
+class AuditLog {
+  +UUID id
+  +String action
+  +String entity_type
+  +String entity_id
+  +UUID performed_by
+  +JSON details
+  +DateTime created_at
+}
+
+Profile "1" -- "0..*" Item : reports >
+Profile "1" -- "0..*" Claim : submits >
+Item "1" -- "0..*" Claim : receives >
+Profile "1" -- "0..*" Notification : receives >
+Profile "1" -- "0..*" AuditLog : performs >
+Profile "0..1" -- "0..*" Claim : reviews (Admin) >
+Profile "0..1" -- "0..*" Claim : confirms handover (Admin) >
+
+@enduml

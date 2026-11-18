@@ -1,0 +1,39 @@
+@startuml
+title Sequence Diagram: Google Authentication & First-Time Onboarding
+
+autonumber
+actor Student
+participant "React Frontend\n(AuthContext)" as UI
+participant "Google OAuth 2.0" as Google
+participant "Supabase Auth\n(GoTrue)" as Auth
+participant "PostgreSQL DB\n(profiles table)" as DB
+
+Student -> UI: Click "Continue with IIITA Account"
+UI -> Google: Redirect to OAuth consent (hd=iiita.ac.in)
+Google -> Student: Prompt institutional login
+Student -> Google: Enter IIITA email & password
+Google --> UI: Return OAuth token & email claim
+
+UI -> Auth: Exchange OAuth token for Supabase session
+Auth --> UI: Return active session & user metadata
+
+alt Email does NOT end in @iiita.ac.in (Domain Violation)
+    UI -> Auth: Terminate session (signOut())
+    UI -> Student: Display rejection error: "Only @iiita.ac.in accounts allowed"
+else Valid @iiita.ac.in Domain
+    UI -> DB: Query profiles where id = auth.uid()
+    
+    alt Profile Record Found (Returning Student)
+        DB --> UI: Return existing Profile data
+        UI -> Student: Route to /dashboard (Session active)
+    else No Profile Found (First-Time User)
+        DB --> UI: PGRST116 (0 rows returned)
+        UI -> Student: Redirect to /onboarding form
+        Student -> UI: Fill roll number, department, batch, phone
+        UI -> DB: INSERT into profiles (id, email, full_name, roll_number, ...)
+        DB --> UI: Profile created successfully
+        UI -> Student: Redirect to /dashboard with welcome toast
+    end
+end
+
+@enduml

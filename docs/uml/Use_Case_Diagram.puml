@@ -1,0 +1,63 @@
+@startuml
+title Khoj — IIITA Lost & Found Platform: Use Case Diagram
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam handwritten false
+skinparam defaultFontName Arial
+
+actor "IIITA Student" as Student
+actor "Campus Administrator" as Admin
+actor "Google OAuth 2.0" as Google
+actor "Supabase Cloud" as Supabase
+
+rectangle "Khoj Web Application" {
+  usecase "UC-01: Sign In via @iiita.ac.in" as UC01
+  usecase "UC-02: Complete Registration" as UC02
+  usecase "UC-03: Report Found Item" as UC03
+  usecase "UC-04: Report Lost Item" as UC04
+  usecase "UC-05: Browse & Search Items" as UC05
+  usecase "UC-06: Submit Ownership Claim" as UC06
+  usecase "UC-07: Track Claim Status" as UC07
+  usecase "UC-08: Review Claim Dossier" as UC08
+  usecase "UC-09: Approve or Reject Claim" as UC09
+  usecase "UC-10: Confirm Physical Handover" as UC10
+  usecase "UC-11: Manage Item Reports" as UC11
+  usecase "UC-12: View Audit Ledger" as UC12
+  
+  usecase "Upload Item Photograph" as UC_Photo
+  usecase "Upload Confidential Evidence" as UC_Evidence
+  usecase "Dispatch In-App Notification" as UC_Notify
+  usecase "Enforce RLS Authorization" as UC_RLS
+}
+
+Student --> UC01
+Student --> UC02
+Student --> UC03
+Student --> UC04
+Student --> UC05
+Student --> UC06
+Student --> UC07
+
+Admin --> UC01
+Admin --> UC08
+Admin --> UC09
+Admin --> UC10
+Admin --> UC11
+Admin --> UC12
+
+UC01 .> Google : <<include>>
+UC03 ..> UC_Photo : <<include>>
+UC06 ..> UC_Evidence : <<extend>>
+UC09 ..> UC_Notify : <<include>>
+UC10 ..> UC_Notify : <<include>>
+UC08 ..> UC_RLS : <<include>>
+UC09 ..> UC_RLS : <<include>>
+UC10 ..> UC_RLS : <<include>>
+
+UC_Photo --> Supabase
+UC_Evidence --> Supabase
+UC_RLS --> Supabase
+
+@enduml

@@ -1,0 +1,100 @@
+@startuml
+title Khoj — IIITA Lost & Found: Entity Relationship (ER) Diagram
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+entity "profiles" as profiles {
+  *id : UUID <<PK, FK auth.users>>
+  --
+  *email : TEXT <<UNIQUE, CHECK @iiita.ac.in>>
+  *full_name : TEXT
+  *roll_number : TEXT <<UNIQUE>>
+  *department : TEXT
+  *academic_batch : TEXT
+  phone : TEXT
+  avatar_url : TEXT
+  *role : TEXT <<CHECK 'student','admin'>>
+  *created_at : TIMESTAMPTZ
+  *updated_at : TIMESTAMPTZ
+}
+
+entity "items" as items {
+  *id : UUID <<PK, gen_random_uuid()>>
+  --
+  *title : TEXT
+  *category : TEXT <<CHECK>>
+  *description : TEXT
+  *report_type : TEXT <<CHECK 'found','lost'>>
+  *location : TEXT
+  *date_occurred : DATE
+  time_occurred : TIME
+  photo_url : TEXT
+  distinguishing_details : TEXT
+  *status : TEXT <<CHECK 'active','claimed','returned','archived'>>
+  *reported_by : UUID <<FK profiles.id>>
+  *created_at : TIMESTAMPTZ
+  *updated_at : TIMESTAMPTZ
+}
+
+entity "claims" as claims {
+  *id : UUID <<PK, gen_random_uuid()>>
+  --
+  *item_id : UUID <<FK items.id>>
+  *claimant_id : UUID <<FK profiles.id>>
+  *claim_message : TEXT
+  proof_details : TEXT
+  proof_photo_url : TEXT
+  location_lost : TEXT
+  date_lost : DATE
+  *status : TEXT <<CHECK 'pending_review','approved','rejected','awaiting_handover','returned'>>
+  reviewed_by : UUID <<FK profiles.id>>
+  reviewed_at : TIMESTAMPTZ
+  review_note : TEXT
+  admin_message : TEXT
+  handover_confirmed_at : TIMESTAMPTZ
+  handover_confirmed_by : UUID <<FK profiles.id>>
+  recipient_name : TEXT
+  recipient_roll_number : TEXT
+  *created_at : TIMESTAMPTZ
+  *updated_at : TIMESTAMPTZ
+  --
+  <<UNIQUE(item_id, claimant_id)>>
+}
+
+entity "notifications" as notifications {
+  *id : UUID <<PK, gen_random_uuid()>>
+  --
+  *user_id : UUID <<FK profiles.id>>
+  *title : TEXT
+  *message : TEXT
+  *type : TEXT <<CHECK>>
+  related_item_id : UUID <<FK items.id>>
+  related_claim_id : UUID <<FK claims.id>>
+  *is_read : BOOLEAN
+  *created_at : TIMESTAMPTZ
+}
+
+entity "audit_logs" as audit_logs {
+  *id : UUID <<PK, gen_random_uuid()>>
+  --
+  *action : TEXT
+  *entity_type : TEXT
+  *entity_id : TEXT
+  *performed_by : UUID <<FK profiles.id>>
+  details : JSONB
+  *created_at : TIMESTAMPTZ
+}
+
+profiles ||--o{ items : "reported_by"
+profiles ||--o{ claims : "claimant_id"
+items ||--o{ claims : "item_id"
+profiles ||--o{ claims : "reviewed_by"
+profiles ||--o{ claims : "handover_confirmed_by"
+profiles ||--o{ notifications : "user_id"
+items ||--o{ notifications : "related_item_id"
+claims ||--o{ notifications : "related_claim_id"
+profiles ||--o{ audit_logs : "performed_by"
+
+@enduml

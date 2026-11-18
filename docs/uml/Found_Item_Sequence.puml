@@ -1,0 +1,32 @@
+@startuml
+title Sequence Diagram: Reporting a Found Item
+
+autonumber
+actor "Student Finder" as Finder
+participant "ReportFoundPage" as UI
+participant "Storage Service" as Storage
+participant "Supabase Storage\n('item-photos' bucket)" as Bucket
+participant "PostgreSQL DB\n(items table)" as DB
+
+Finder -> UI: Fill title, category, description, campus location, date
+Finder -> UI: Select item photograph
+UI -> UI: Validate MIME type (JPEG/PNG/WebP) and size (< 5MB)
+
+Finder -> UI: Click "Publish Found Item Report"
+UI -> DB: INSERT into items (title, category, location, date_occurred, reported_by=auth.uid(), status='active')
+DB --> UI: Return newly created item record with UUID
+
+alt Photograph Selected
+    UI -> Storage: uploadItemPhoto(file, item.id)
+    Storage -> Bucket: Upload object to item-photos/{item.id}/{timestamp}.ext
+    Bucket --> Storage: Upload confirmed
+    Storage -> Bucket: getPublicUrl(path)
+    Bucket --> Storage: Return public CDN image URL
+    Storage --> UI: Return photo_url
+    UI -> DB: UPDATE items SET photo_url = url WHERE id = item.id
+    DB --> UI: Update confirmed
+end
+
+UI -> Finder: Display success toast and navigate to /items/:id
+
+@enduml
