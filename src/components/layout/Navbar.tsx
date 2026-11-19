@@ -53,27 +53,29 @@ export function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => {
-              const Icon = link.icon;
-              const isActive = location.pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'text-primary-700 bg-primary-50'
-                      : 'text-surface-600 hover:text-surface-900 hover:bg-surface-100'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {link.label}
-                </Link>
-              );
-            })}
-          </nav>
+          {/* Desktop Navigation Links - Only visible to authenticated users */}
+          {user && (
+            <nav className="hidden md:flex items-center gap-1">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                const isActive = location.pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'text-primary-700 bg-primary-50'
+                        : 'text-surface-600 hover:text-surface-900 hover:bg-surface-100'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
 
           {/* User Controls & Notifications */}
           <div className="flex items-center gap-2">
@@ -144,28 +146,28 @@ export function Navbar() {
                     </div>
                   )}
                 </div>
+
+                {/* Mobile menu trigger */}
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="md:hidden p-2 text-surface-600 hover:text-surface-900 rounded-lg hover:bg-surface-100"
+                >
+                  {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </button>
               </>
-            ) : (
+            ) : location.pathname !== '/login' ? (
               <Link to="/login" className="btn-primary btn-sm">
                 <UserIcon className="w-4 h-4" />
                 Sign In
               </Link>
-            )}
-
-            {/* Mobile menu trigger */}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-surface-600 hover:text-surface-900 rounded-lg hover:bg-surface-100"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+            ) : null}
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
+      {/* Mobile Menu - Only for authenticated users */}
+      {mobileMenuOpen && user && (
         <div className="md:hidden border-t border-surface-200 bg-white px-4 pt-2 pb-4 space-y-1">
           {navLinks.map((link) => {
             const Icon = link.icon;
@@ -186,27 +188,23 @@ export function Navbar() {
               </Link>
             );
           })}
-          {user && (
-            <>
-              <Link
-                to="/dashboard"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-surface-600 hover:bg-surface-100"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                My Dashboard
-              </Link>
-              {isAdmin && (
-                <Link
-                  to="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-primary-700 bg-primary-50"
-                >
-                  <ShieldCheck className="w-4 h-4" />
-                  Admin Portal
-                </Link>
-              )}
-            </>
+          <Link
+            to="/dashboard"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-surface-600 hover:bg-surface-100"
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            My Dashboard
+          </Link>
+          {isAdmin && (
+            <Link
+              to="/admin"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-primary-700 bg-primary-50"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              Admin Portal
+            </Link>
           )}
         </div>
       )}

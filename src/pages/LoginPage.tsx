@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Shield, AlertCircle, ArrowRight } from 'lucide-react';
 
@@ -8,9 +8,12 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = (location.state as { from?: { pathname?: string } })?.from?.pathname || '/';
 
   if (user && !needsOnboarding) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={from} replace />;
   }
 
   if (user && needsOnboarding) {

@@ -70,11 +70,8 @@ export function App() {
   return (
     <Layout>
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<HomePage />} />
+        {/* Auth Route - Only Public Entry Point */}
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/browse" element={<BrowseItemsPage />} />
-        <Route path="/items/:id" element={<ItemDetailPage />} />
 
         {/* Onboarding Route */}
         <Route
@@ -86,7 +83,31 @@ export function App() {
           }
         />
 
-        {/* Student Protected Routes */}
+        {/* Closed Campus Protected Routes - Only Accessible After Institutional Sign-In */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/browse"
+          element={
+            <ProtectedRoute>
+              <BrowseItemsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/items/:id"
+          element={
+            <ProtectedRoute>
+              <ItemDetailPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/report/found"
           element={
@@ -179,7 +200,14 @@ export function App() {
         />
 
         {/* 404 Catch-All */}
-        <Route path="*" element={<NotFoundPage />} />
+        <Route
+          path="*"
+          element={
+            <ProtectedRoute>
+              <NotFoundPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Layout>
   );
