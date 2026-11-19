@@ -24,6 +24,7 @@ import {
   Edit2,
   Save,
   X,
+  Send,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -551,6 +552,53 @@ export function DashboardPage() {
                   {profile?.phone || 'Not provided'}
                 </span>
               )}
+            </div>
+
+            {/* Telegram Bot Integration Card */}
+            <div className="rounded-xl p-4 bg-sky-50/70 border border-sky-200/80 mt-4 space-y-2.5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Send className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-surface-900">
+                      Khoj Telegram Bot (@iiita_khoj_bot)
+                    </h4>
+                    <p className="text-2xs text-surface-500">
+                      Report lost items directly in Telegram in under 30 seconds
+                    </p>
+                  </div>
+                </div>
+
+                {profile?.telegram_chat_id ? (
+                  <span className="badge bg-green-100 text-green-800 text-2xs font-semibold">
+                    Linked
+                  </span>
+                ) : (
+                  <span className="badge bg-surface-200 text-surface-600 text-2xs font-semibold">
+                    Not Linked
+                  </span>
+                )}
+              </div>
+
+              <p className="text-2xs text-surface-600 leading-relaxed">
+                {profile?.telegram_chat_id
+                  ? `Your Telegram account (${profile.telegram_username || 'connected'}) is active. You can report notices on the go and receive instant claim alerts.`
+                  : 'Link your Telegram to report lost/found items with photos right from your phone without opening a browser.'}
+              </p>
+
+              <div>
+                <a
+                  href={`https://t.me/iiita_khoj_bot?start=${user?.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary btn-sm inline-flex items-center gap-1.5 text-xs bg-sky-600 hover:bg-sky-700 text-white"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  {profile?.telegram_chat_id ? 'Open Telegram Bot' : 'Connect Telegram Bot'}
+                </a>
+              </div>
             </div>
           </div>
 

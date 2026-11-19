@@ -33,6 +33,8 @@ export interface Profile {
   phone: string | null;
   avatar_url: string | null;
   role: UserRole;
+  telegram_chat_id?: number | null;
+  telegram_username?: string | null;
   created_at: string;
   updated_at: string;
 }
