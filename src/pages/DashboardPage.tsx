@@ -120,6 +120,16 @@ export function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <a
+              href={`https://t.me/iiita_khoj_bot?start=${user?.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-sm inline-flex items-center gap-1.5 bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 rounded-lg text-xs font-semibold transition-colors"
+              title="Khoj Telegram Bot"
+            >
+              <Send className="w-3.5 h-3.5 text-sky-600" />
+              <span>{profile?.telegram_chat_id ? 'Telegram Bot' : 'Connect Telegram'}</span>
+            </a>
             <Link to="/report/found" className="btn-primary btn-sm">
               <PlusCircle className="w-4 h-4" />
               Report Found
@@ -158,7 +168,45 @@ export function DashboardPage() {
 
       {/* Tab 1: Overview */}
       {activeTab === 'overview' && (
-        <div className="space-y-8">
+        <div className="space-y-6">
+          {/* Telegram Bot Quick Banner */}
+          <div className="card p-4 sm:p-5 bg-gradient-to-r from-sky-50 via-white to-sky-50/40 border-sky-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Send className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-bold text-surface-900">
+                    Khoj Telegram Bot (@iiita_khoj_bot)
+                  </h4>
+                  {profile?.telegram_chat_id ? (
+                    <span className="badge bg-green-100 text-green-800 text-2xs font-semibold">
+                      Connected
+                    </span>
+                  ) : (
+                    <span className="badge bg-sky-100 text-sky-800 text-2xs font-semibold">
+                      Fast Mobile Reporting
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-surface-500 mt-0.5">
+                  Report lost or found items directly from Telegram in under 30 seconds with photos.
+                </p>
+              </div>
+            </div>
+
+            <a
+              href={`https://t.me/iiita_khoj_bot?start=${user?.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary btn-sm inline-flex items-center gap-2 text-xs bg-sky-600 hover:bg-sky-700 text-white shrink-0 self-start sm:self-auto shadow-xs"
+            >
+              <Send className="w-3.5 h-3.5" />
+              {profile?.telegram_chat_id ? 'Open Telegram Bot' : 'Connect Telegram Bot'}
+            </a>
+          </div>
+
           {/* Stat Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="card p-5 bg-white">
