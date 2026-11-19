@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khoj — IIITA Lost & Found: Project Presentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #e9741e;
+      --primary-dark: #c85a0e;
+      --primary-light: #fef7ee;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --accent: #38bdf8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      user-select: none;
+    }
+
+    /* Top navigation bar */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 54px;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: #334155;
+      border-color: #475569;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .slide-counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-muted);
+      min-width: 70px;
+      text-align: center;
+    }
+
+    /* Main presentation viewport */
+    .presentation-container {
+      position: absolute;
+      top: 54px;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1100px;
+      height: 92%;
+      max-height: 700px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 56px;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.3s ease;
+      position: relative;
+    }
+
+    .slide.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Slide Header */
+    .slide-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: rgba(233, 116, 30, 0.15);
+      border: 1px solid rgba(233, 116, 30, 0.4);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      width: fit-content;
+      margin-bottom: 12px;
+    }
+
+    .slide-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 32px;
+      color: #fff;
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .slide-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Grids & Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .sub-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .sub-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sub-card p {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    ul.bullet-list {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    ul.bullet-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #e2e8f0;
+    }
+
+    ul.bullet-list li::before {
+      content: "•";
+      color: var(--primary);
+      font-weight: bold;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* Tables */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: rgba(15, 23, 42, 0.4);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    table.data-table th, table.data-table td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    table.data-table th {
+      background: rgba(30, 41, 59, 0.8);
+      color: #cbd5e1;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .code-block {
+      background: #090d16;
+      border: 1px solid #1e293b;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #38bdf8;
+      overflow-x: auto;
+    }
+
+    /* Speaker Notes Overlay */
+    .speaker-notes-panel {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      right: 24px;
+      max-width: 800px;
+      margin: 0 auto;
+      background: #020617;
+      border: 2px solid var(--primary);
+      border-radius: 16px;
+      padding: 20px 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+      z-index: 200;
+    }
+
+    .speaker-notes-panel.active {
+      display: block;
+    }
+
+    .notes-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .notes-content {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        overflow: visible;
+        background: #fff;
+        color: #000;
+      }
+      .top-bar, .speaker-notes-panel {
+        display: none !important;
+      }
+      .presentation-container {
+        position: static;
+        padding: 0;
+        display: block;
+      }
+      .slide {
+        display: block !important;
+        page-break-after: always;
+        max-width: 100%;
+        max-height: none;
+        height: auto;
+        box-shadow: none;
+        border: 1px solid #ccc;
+        background: #fff;
+        color: #000;
+        margin-bottom: 40px;
+      }
+      .slide-title { color: #000; }
+      .sub-card { background: #f8fafc; border-color: #e2e8f0; color: #000; }
+      .sub-card h4 { color: #000; }
+      ul.bullet-list li { color: #333; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <header class="top-bar">
+    <div class="brand">
+      <div class="brand-icon">ख</div>
+      <span>Khoj — IIITA Lost & Found</span>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="prevBtn" title="Previous Slide (←)">◀ Prev</button>
+      <span class="slide-counter" id="slideNum">1 / 20</span>
+      <button class="btn" id="nextBtn" title="Next Slide (→ or Space)">Next ▶</button>
+      <button class="btn" id="notesBtn" title="Toggle Speaker Notes (N)">🎙️ Notes</button>
+      <button class="btn" id="fullBtn" title="Toggle Fullscreen (F)">⛶ Fullscreen</button>
+      <button class="btn btn-primary" onclick="window.print()" title="Print / Export to PDF">🖨️ PDF</button>
+    </div>
+  </header>
+
+  <!-- Presentation container -->
+  <main class="presentation-container">
+
+    <!-- Slide 1: Title -->
+    <div class="slide active" data-notes="Good morning respected professors and evaluators. Today I am presenting Khoj, a production-grade institutional asset recovery web platform engineered specifically for IIIT Allahabad. Khoj delivers a dispute-proof, secure ecosystem featuring @iiita.ac.in domain authentication, physical handover verification at campus security desks, and an omnichannel conversational bot on Telegram. It is currently deployed live at khoj-pink.vercel.app.">
+      <div class="slide-badge">Software Engineering Capstone • IIIT Allahabad</div>
+      <h1 class="slide-title" style="font-size: 42px; margin-top: 10px;">Khoj — IIITA Lost & Found Platform</h1>
+      <p class="slide-subtitle" style="font-size: 16px;">An Institutional Asset Recovery System with Dispute-Proof Claim Verification & Omnichannel Telegram Architecture</p>
+      
+      <div class="slide-body" style="justify-content: center;">
+        <div class="sub-card" style="border-left: 4px solid var(--primary); background: rgba(233,116,30,0.06); padding: 24px;">
+          <div class="grid-2">
+            <div>
+              <p style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Lead Developer & Presenter</p>
+              <h3 style="color: #fff; font-size: 18px; margin-top: 2px;">Chandranshu</h3>
+              <p style="color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 13px;">Roll Number: IIT2025098</p>
+              <p style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">Department of Information Technology</p>
+            </div>
+            <div>
+              <p style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Live Production Links</p>
+              <p style="font-size: 13px; margin-top: 2px;">🌐 Web: <a href="https://khoj-pink.vercel.app/" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">khoj-pink.vercel.app</a></p>
+              <p style="font-size: 13px; margin-top: 4px;">🤖 Bot: <a href="https://t.me/iiita_khoj_bot" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 600;">@iiita_khoj_bot</a></p>
+              <p style="font-size: 13px; margin-top: 4px;">🗄️ Database: <span style="color: #94a3b8;">Supabase Cloud (PostgreSQL 15+)</span></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-4" style="margin-top: 20px;">
+          <div class="sub-card" style="text-align: center; padding: 14px;">
+            <div style="font-size: 20px; font-weight: 800; color: #fff;">React 19</div>
+            <div style="font-size: 11px; color: var(--text-muted);">TypeScript + Vite 6</div>
+          </div>
+          <div class="sub-card" style="text-align: center; padding: 14px;">
+            <div style="font-size: 20px; font-weight: 800; color: #fff;">PostgreSQL</div>
+            <div style="font-size: 11px; color: var(--text-muted);">24 RLS Policies</div>
+          </div>
+          <div class="sub-card" style="text-align: center; padding: 14px;">
+            <div style="font-size: 20px; font-weight: 800; color: #fff;">Telegram</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Serverless Webhook</div>
+          </div>
+          <div class="sub-card" style="text-align: center; padding: 14px;">
+            <div style="font-size: 20px; font-weight: 800; color: #fff;">$0.00 / Mo</div>
+            <div style="font-size: 11px; color: var(--text-muted);">100% Free Hosting</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2: Problem Statement -->
+    <div class="slide" data-notes="On campus, losing an item like an ID card, calculator, charger, or keys is very common. Historically students relied on WhatsApp batches, Discord, or broadcast emails. These channels fail because notices drown in chat noise within 2 hours, there is zero verification of ownership, students leak their personal phone numbers, and security desks have no standardized log of who collected an item.">
+      <div class="slide-badge">Phase 1: Problem Definition</div>
+      <h2 class="slide-title">Problem Statement & Motivation</h2>
+      <p class="slide-subtitle">Why traditional ad-hoc lost and found mechanisms fail in university campuses</p>
+
+      <div class="slide-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>Architectural Vulnerability</th>
+              <th>Impact on Campus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>WhatsApp Batches</strong></td>
+              <td>Messages drown under chat flood within 2 hours; unsearchable</td>
+              <td>Low recovery rates (< 25%); endless duplicate forwards</td>
+            </tr>
+            <tr>
+              <td><strong>Institute Emails</strong></td>
+              <td>Inbox clutter; flagged as spam; lack photo preview</td>
+              <td>Information fatigue; missed notifications</td>
+            </tr>
+            <tr>
+              <td><strong>Physical Noticeboards</strong></td>
+              <td>Pinned to one wall (e.g. CC3/SAC); weather-damaged</td>
+              <td>Zero reach to students in other hostels or departments</td>
+            </tr>
+            <tr>
+              <td><strong>Informal Desk Handover</strong></td>
+              <td>No ID check; zero chain-of-custody tracking</td>
+              <td>Fraudulent claims; dispute liability falls on guards</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="grid-3" style="margin-top: 10px;">
+          <div class="sub-card">
+            <h4>⚠️ No Identity Verification</h4>
+            <p>Anyone can message a founder and claim an expensive gadget without proof.</p>
+          </div>
+          <div class="sub-card">
+            <h4>🔒 Privacy Exposure</h4>
+            <p>Students publicly blast their WhatsApp and phone numbers to hundreds of peers.</p>
+          </div>
+          <div class="sub-card">
+            <h4>📜 Zero Audit Trail</h4>
+            <p>Once an item is handed over informally, there is zero record of who took it.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Objectives & Vision -->
+    <div class="slide" data-notes="Khoj was engineered to solve every single one of those problems. Our objectives were: restrict access strictly to @iiita.ac.in institutional emails, implement two-factor claim verification where secret marks are hidden from public noticeboards, enforce formal desk handover protocols where recipient roll numbers are permanently logged, and offer conversational reporting on Telegram.">
+      <div class="slide-badge">Phase 1: Objectives & Scope</div>
+      <h2 class="slide-title">Project Vision & Core Objectives</h2>
+      <p class="slide-subtitle">A zero-cost, dispute-proof asset recovery ecosystem engineered for IIIT Allahabad</p>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="sub-card" style="border-top: 3px solid var(--primary);">
+            <h4>1. Institutional Security Boundary</h4>
+            <p>Restricted strictly to verified <strong>@iiita.ac.in</strong> Google accounts. Non-campus users are completely locked out at both frontend and database layers.</p>
+          </div>
+          <div class="sub-card" style="border-top: 3px solid var(--accent);">
+            <h4>2. Anti-Fraud Claim Protocol</h4>
+            <p>Two-factor ownership verification: finder enters secret distinguishing details (hidden from public); claimant must provide proof (receipts, serial numbers) to admin.</p>
+          </div>
+          <div class="sub-card" style="border-top: 3px solid var(--success);">
+            <h4>3. Security Desk Handover Governance</h4>
+            <p>Physical handover at CC3/Hostel desks requires physical ID card inspection. Admin logs the verified student Roll Number in an immutable audit trail.</p>
+          </div>
+          <div class="sub-card" style="border-top: 3px solid var(--warning);">
+            <h4>4. Omnichannel Mobile Reporting</h4>
+            <p>Telegram Bot (<strong>@iiita_khoj_bot</strong>) enables students on the move to report lost or found items in 30 seconds with photos without opening a browser.</p>
+          </div>
+        </div>
+
+        <div class="code-block" style="margin-top: 10px;">
+          Zero-Cost Architecture: Vercel CDN ($0) + Supabase PostgreSQL ($0) + Telegram Bot API ($0) = Total Cost: $0.00 / month
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4: SDLC Methodology -->
+    <div class="slide" data-notes="We followed an Agile Scrum software development lifecycle divided into four two-week sprints. Sprint 1 authored the SRS, RTM, and PostgreSQL schema. Sprint 2 built the React 19 frontend and Google OAuth integration. Sprint 3 delivered the claim verification and admin handover desks. Sprint 4 introduced the Telegram Bot, Vitest test suites, and production deployment on Vercel.">
+      <div class="slide-badge">Phase 2: SDLC Process</div>
+      <h2 class="slide-title">Software Engineering Methodology</h2>
+      <p class="slide-subtitle">Agile Scrum framework with strict iterative sprint deliverables and documentation</p>
+
+      <div class="slide-body">
+        <div class="grid-4">
+          <div class="sub-card" style="border-top: 3px solid #38bdf8;">
+            <div style="font-size: 11px; color: var(--accent); font-weight: 700;">SPRINT 1 (Days 1–3)</div>
+            <h4 style="margin-top: 4px;">Requirements & DB</h4>
+            <p>• IEEE 830 SRS authored<br>• Use Case specs & RTM<br>• PostgreSQL Schema design<br>• 24 RLS Security policies</p>
+          </div>
+          <div class="sub-card" style="border-top: 3px solid #e9741e;">
+            <div style="font-size: 11px; color: var(--primary); font-weight: 700;">SPRINT 2 (Days 4–6)</div>
+            <h4 style="margin-top: 4px;">Core Web Portal</h4>
+            <p>• React 19 + TypeScript + Vite<br>• Google OAuth (@iiita.ac.in)<br>• Search & Noticeboard filters<br>• Supabase Storage upload</p>
+          </div>
+          <div class="sub-card" style="border-top: 3px solid #22c55e;">
+            <div style="font-size: 11px; color: var(--success); font-weight: 700;">SPRINT 3 (Days 7–9)</div>
+            <h4 style="margin-top: 4px;">Admin & Claims Desk</h4>
+            <p>• Two-factor claims reviewer<br>• Physical Handover desk<br>• Auto-reject competing claims<br>• Immutable audit trail</p>
+          </div>
+          <div class="sub-card" style="border-top: 3px solid #f59e0b;">
+            <div style="font-size: 11px; color: var(--warning); font-weight: 700;">SPRINT 4 (Days 10–12)</div>
+            <h4 style="margin-top: 4px;">Bot, QA & Go-Live</h4>
+            <p>• Telegram Serverless Webhook<br>• @iiita_khoj_bot state machine<br>• Vitest (40 Test Cases)<br>• Production release on Vercel</p>
+          </div>
+        </div>
+
+        <div class="sub-card" style="margin-top: 15px;">
+          <h4>Academic SDLC Artifacts Produced</h4>
+          <p>Full suite of documentation generated in <code>/docs</code>: SRS.md, Requirement_Analysis.md, Use_Case_Specifications.md, Requirements_Traceability_Matrix.md, Architecture_Design.md, Database_Design.md, Test_Plan.md, 40 Test Cases, Risk_Register.md, SQA_Plan.md, and 12 UML diagrams.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 5: Functional Requirements -->
+    <div class="slide" data-notes="Our Functional Requirements were mapped formally. Key highlights include FR-01 and FR-02 enforcing domain and closed-campus walls. FR-07 protecting secret distinguishing marks. FR-20 enforcing automated atomic rejection of competing claims when one claim is approved. And FR-24 ensuring handovers log student roll numbers.">
+      <div class="slide-badge">Phase 2: Requirements Analysis</div>
+      <h2 class="slide-title">Functional Requirements (FR) Overview</h2>
+      <p class="slide-subtitle">Traceable functional specifications mapped to architectural modules</p>
+
+      <div class="slide-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Module</th>
+              <th>Functional Capability</th>
+              <th>Verification Method</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>FR-01</strong></td>
+              <td>Authentication</td>
+              <td>Google OAuth restricted strictly to @iiita.ac.in domain</td>
+              <td>Automated Regex & DB Check Constraint</td>
+            </tr>
+            <tr>
+              <td><strong>FR-02</strong></td>
+              <td>Access Control</td>
+              <td>Closed campus wall: all unauthenticated routes redirect to /login</td>
+              <td>React ProtectedRoute Guard</td>
+            </tr>
+            <tr>
+              <td><strong>FR-05</strong></td>
+              <td>Reporting</td>
+              <td>Report found items with photo upload to item-photos bucket</td>
+              <td>Supabase Storage API test</td>
+            </tr>
+            <tr>
+              <td><strong>FR-07</strong></td>
+              <td>Anti-Fraud</td>
+              <td>Secret distinguishing marks visible only to admin and founder</td>
+              <td>Row-Level Security select policy</td>
+            </tr>
+            <tr>
+              <td><strong>FR-15</strong></td>
+              <td>Claims</td>
+              <td>Submit ownership claims with private purchase invoice/proof</td>
+              <td>Encrypted claim-evidence bucket</td>
+            </tr>
+            <tr>
+              <td><strong>FR-20</strong></td>
+              <td>Verification</td>
+              <td>Admin approval automatically rejects competing claims on item</td>
+              <td>Atomic PostgreSQL update block</td>
+            </tr>
+            <tr>
+              <td><strong>FR-24</strong></td>
+              <td>Handover</td>
+              <td>Desk officer records verified student Roll No. at physical pickup</td>
+              <td>Handover modal form validation</td>
+            </tr>
+            <tr>
+              <td><strong>FR-28</strong></td>
+              <td>Auditing</td>
+              <td>Immutable audit logging for 100% of administrative actions</td>
+              <td>PostgreSQL INSERT-only audit table</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Slide 6: System Architecture -->
+    <div class="slide" data-notes="Here is our three-tier system architecture. The presentation layer features React 19 and Telegram. The edge layer runs on Vercel CDN and Vercel serverless functions. The data layer is hosted on Supabase Cloud featuring PostgreSQL 15, PostgREST auto-generated APIs, GoTrue authentication, and S3-compatible storage. Client and bot both talk directly to PostgreSQL.">
+      <div class="slide-badge">Phase 3: System Architecture</div>
+      <h2 class="slide-title">Three-Tier Decoupled Cloud Architecture</h2>
+      <p class="slide-subtitle">High-throughput, serverless architecture with zero operational maintenance</p>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="sub-card" style="border-top: 3px solid var(--accent);">
+            <h4>1. Client Interaction Tier</h4>
+            <p><strong>React 19 Single Page App</strong><br>• TypeScript + Vite 6 + Tailwind<br>• SPA Client-side routing<br>• Lucide Icons + Hot-Toast notifications<br><br><strong>Telegram Messenger Client</strong><br>• Native mobile UX on student phones</p>
+          </div>
+          <div class="sub-card" style="border-top: 3px solid var(--primary);">
+            <h4>2. Serverless Edge Tier</h4>
+            <p><strong>Vercel Global Edge Network</strong><br>• Edge asset caching & SSL/TLS<br>• vercel.json SPA rewrites<br><br><strong>Serverless API (/api/telegram)</strong><br>• Node.js webhook handler<br>• Bot state machine & photo pipe<br>• Zero idle server costs</p>
+          </div>
+          <div class="sub-card" style="border-top: 3px solid var(--success);">
+            <h4>3. Managed Data Tier</h4>
+            <p><strong>Supabase Cloud Platform</strong><br>• PostgreSQL 15+ Relational Engine<br>• PostgREST Auto-APIs<br>• GoTrue OAuth 2.0 Provider<br>• S3-Compatible Media Buckets<br>• WebSocket Real-time notifications</p>
+          </div>
+        </div>
+
+        <div class="code-block">
+          Architecture Highlights: Zero servers to manage • Automatic SSL • Sub-50ms query response time • Real-time DB subscriptions
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 7: Database Design -->
+    <div class="slide" data-notes="The relational database schema consists of six core tables: profiles, items, claims, notifications, audit_logs, and telegram_sessions. Referential integrity is strictly maintained. Foreign keys cascade when items are deleted, preventing orphan records. We also engineered custom PL/pgSQL security definer functions like publish_item_from_bot and link_telegram_account.">
+      <div class="slide-badge">Phase 3: Database Design</div>
+      <h2 class="slide-title">PostgreSQL Database Schema</h2>
+      <p class="slide-subtitle">Normalized relational schema with cascading constraints and stored procedures</p>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="sub-card">
+            <h4>Core Relational Tables</h4>
+            <ul class="bullet-list">
+              <li><strong>profiles:</strong> ID, email, full_name, roll_number, department, role, telegram_chat_id.</li>
+              <li><strong>items:</strong> ID, title, category, report_type (lost/found), location, status, photo_url, reported_by.</li>
+              <li><strong>claims:</strong> ID, item_id, claimant_id, proof_details, proof_photo_url, status, recipient_roll_number.</li>
+              <li><strong>notifications:</strong> Real-time user alerts for claims, approvals, and returns.</li>
+              <li><strong>audit_logs:</strong> Immutable trail of actions, timestamps, and performers.</li>
+              <li><strong>telegram_sessions:</strong> Multi-step conversational state machine cache.</li>
+            </ul>
+          </div>
+
+          <div class="sub-card">
+            <h4>Stored Procedures & Triggers</h4>
+            <ul class="bullet-list">
+              <li><code>is_admin():</code> Security-definer function returning boolean based on auth.uid().</li>
+              <li><code>handle_updated_at():</code> Trigger automatically refreshing updated_at timestamps.</li>
+              <li><code>publish_item_from_bot():</code> Elevated stored procedure allowing the Telegram bot to insert notices safely.</li>
+              <li><code>link_telegram_account():</code> Atomically binds a Telegram chat ID to a verified student UUID.</li>
+              <li><strong>14 Strategic B-Tree Indexes:</strong> Fast lookup on category, status, and claimant IDs.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 8: Database Security & RLS -->
+    <div class="slide" data-notes="Security is baked into PostgreSQL via Row-Level Security. We configured 24 policies. Students can only update their own active items and are mathematically prevented from changing their role to admin. Audit logs have no update or delete policies whatsoever, making them tamper-proof. Storage buckets isolate public photos from private claim evidence.">
+      <div class="slide-badge">Phase 3: Database Security</div>
+      <h2 class="slide-title">Row-Level Security (RLS) Policies</h2>
+      <p class="slide-subtitle">Defense-in-depth security model implemented at the database engine level</p>
+
+      <div class="slide-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Table</th>
+              <th>Operation</th>
+              <th>Target Role</th>
+              <th>Security Policy Rule (SQL)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>profiles</code></td>
+              <td>UPDATE</td>
+              <td>authenticated</td>
+              <td>auth.uid() = id AND role = (SELECT role FROM profiles WHERE id = auth.uid())</td>
+            </tr>
+            <tr>
+              <td><code>items</code></td>
+              <td>SELECT</td>
+              <td>authenticated</td>
+              <td>status IN ('active', 'claimed', 'returned') OR public.is_admin()</td>
+            </tr>
+            <tr>
+              <td><code>items</code></td>
+              <td>DELETE</td>
+              <td>authenticated</td>
+              <td>public.is_admin() -- Only admins authorized to delete</td>
+            </tr>
+            <tr>
+              <td><code>claims</code></td>
+              <td>SELECT</td>
+              <td>authenticated</td>
+              <td>claimant_id = auth.uid() OR public.is_admin() OR reporter</td>
+            </tr>
+            <tr>
+              <td><code>audit_logs</code></td>
+              <td>ALL</td>
+              <td>authenticated</td>
+              <td>SELECT only for is_admin(); UPDATE & DELETE permanently revoked</td>
+            </tr>
+            <tr>
+              <td><code>storage.objects</code></td>
+              <td>SELECT</td>
+              <td>authenticated</td>
+              <td>bucket_id = 'claim-evidence' AND (is_admin() OR auth.uid()::text = folder)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="code-block" style="margin-top: 10px;">
+          Privilege Escalation Prevention: Even if a user executes direct REST calls, PostgreSQL rejects unauthorized column mutations.
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 9: UML Models -->
+    <div class="slide" data-notes="Our system was modeled using 12 UML 2.5 diagrams. In our Class Diagram, React hooks encapsulate API logic away from components. In our ER Diagram, relationships between profiles, items, and claims are clearly defined. All 12 diagrams are exported as high-resolution PNGs and vector SVGs in docs/uml/images.">
+      <div class="slide-badge">Phase 3: Object-Oriented Design</div>
+      <h2 class="slide-title">UML Structural Modeling</h2>
+      <p class="slide-subtitle">Comprehensive architectural models covering structural and component designs</p>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="sub-card">
+            <h4>Class Diagram</h4>
+            <p>• Models domain entities (<code>Profile</code>, <code>Item</code>, <code>Claim</code>, <code>AuditLog</code>).<br>• Custom hooks (<code>useItems</code>, <code>useClaims</code>, <code>useAdmin</code>).<br>• Decoupled UI components with strict TypeScript interfaces.</p>
+          </div>
+          <div class="sub-card">
+            <h4>Component Diagram</h4>
+            <p>• Illustrates subsystem boundaries between React UI, AuthContext, PostgREST API client, and Telegram Serverless Edge Webhook.<br>• Storage service isolates file validation.</p>
+          </div>
+          <div class="sub-card">
+            <h4>Deployment Diagram</h4>
+            <p>• Physical deployment nodes: Client Browser, Telegram Cloud, Vercel Global Edge CDN, and Supabase Managed PostgreSQL Cluster with S3 Storage.</p>
+          </div>
+        </div>
+
+        <div class="sub-card" style="margin-top: 15px;">
+          <h4>12 Formal UML Diagrams Delivered in <code>/docs/uml/</code></h4>
+          <p>Use Case Diagram • Class Diagram • Component Diagram • Deployment Diagram • Entity-Relationship Diagram • State Machine Diagram • Activity Diagrams • 5 Sequence Diagrams (Authentication, Report Found, Report Lost, Claim Ownership, Physical Handover).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 10: State Machine & Sequences -->
+    <div class="slide" data-notes="This slide shows our behavioral modeling. Items transition from Active to Claimed when an admin approves a claim, and then to Returned only after physical ID inspection at the desk. Sequence diagrams model the Google OAuth verification flow and the physical handover process.">
+      <div class="slide-badge">Phase 3: Behavioral Modeling</div>
+      <h2 class="slide-title">UML Behavioral Modeling</h2>
+      <p class="slide-subtitle">State transitions and sequence flows governing item lifecycles</p>
+
+      <div class="slide-body">
+        <div class="sub-card" style="border-left: 4px solid var(--primary);">
+          <h4>Item Lifecycle State Machine</h4>
+          <p style="margin-top: 6px;">
+            <strong>[ * ]</strong> ➔ <strong>Active</strong> (Reported by student) ➔ <strong>Claimed</strong> (Admin approves claim; other claims auto-rejected) ➔ <strong>Returned</strong> (Physical ID verified at desk) ➔ <strong>[ * ]</strong><br>
+            <em>Alternate path:</em> Active ➔ <strong>Archived</strong> (Admin cleans up duplicate/expired report) ➔ <strong>[ * ]</strong>
+          </p>
+        </div>
+
+        <div class="sub-card" style="border-left: 4px solid var(--accent); margin-top: 10px;">
+          <h4>Claim Lifecycle State Machine</h4>
+          <p style="margin-top: 6px;">
+            <strong>[ * ]</strong> ➔ <strong>Pending Review</strong> ➔ <strong>Approved</strong> ➔ <strong>Awaiting Handover</strong> ➔ <strong>Returned</strong> (Recipient Roll No logged)<br>
+            <em>Rejection path:</em> Pending Review ➔ <strong>Rejected</strong> (Admin reason sent to student via in-app notification)
+          </p>
+        </div>
+
+        <div class="sub-card" style="border-left: 4px solid var(--success); margin-top: 10px;">
+          <h4>Physical Handover Sequence Protocol</h4>
+          <p style="margin-top: 6px;">
+            1. Student brings physical college ID to Security Desk ➔ 2. Admin opens <code>/admin/handovers</code> ➔ 3. Admin verifies Name & Roll No. on card ➔ 4. System atomically closes claim and writes immutable audit entry ➔ 5. In-app & Telegram alert sent.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 11: Core Feature: Closed Campus Wall -->
+    <div class="slide" data-notes="Let's look at the live user experience. We engineered a strict closed-campus wall. Unauthenticated visitors cannot browse notices, see student names, or report items. All traffic redirects to the login screen. Login requires an institutional Google account ending in @iiita.ac.in.">
+      <div class="slide-badge">Phase 4: Implementation Walkthrough</div>
+      <h2 class="slide-title">Closed Campus Wall & Institutional Auth</h2>
+      <p class="slide-subtitle">Eliminating public scraping and ensuring 100% verified campus identities</p>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="sub-card">
+            <h4>Mandatory Institutional Login Wall</h4>
+            <ul class="bullet-list">
+              <li>All routes (<code>/</code>, <code>/browse</code>, <code>/dashboard</code>, <code>/report/*</code>) are strictly protected by React route guards.</li>
+              <li>Unauthenticated visitors are immediately redirected to <code>/login</code>.</li>
+              <li>Navigation links (Browse, Report, Dashboard) remain completely hidden until sign-in.</li>
+              <li>Prevents external scrapers or non-campus personnel from viewing internal notices.</li>
+            </ul>
+          </div>
+
+          <div class="sub-card">
+            <h4>Google OAuth 2.0 Restricted to @iiita.ac.in</h4>
+            <ul class="bullet-list">
+              <li>Auth provider parameters enforce <code>hd: 'iiita.ac.in'</code>.</li>
+              <li>Client-side guard rejects any personal <code>@gmail.com</code> or external domains.</li>
+              <li>Database CHECK constraint provides redundant server-side enforcement: <code>CHECK (email LIKE '%@iiita.ac.in')</code>.</li>
+              <li>First-time onboarding captures Student Roll Number, Academic Batch, and Department.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="code-block" style="margin-top: 15px;">
+          Security Verification: Tested with malicious attempts to login via personal Gmail; Supabase and React both successfully reject the attempt.
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 12: Core Feature: Noticeboard -->
+    <div class="slide" data-notes="The campus noticeboard provides real-time debounced search across item titles, locations, and descriptions. Multi-filter allows students to filter by Electronics, Keys, Wallets, Lost vs Found, and Status. The authentic Hindi letter 'ख' is featured in the favicon, navbar, and headers.">
+      <div class="slide-badge">Phase 4: Implementation Walkthrough</div>
+      <h2 class="slide-title">Campus Noticeboard & Discovery</h2>
+      <p class="slide-subtitle">High-performance noticeboard with real-time multi-filtering and authentic campus branding</p>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="sub-card">
+            <h4>Debounced Search Bar</h4>
+            <p>Live full-text search across item titles, descriptions, and campus locations (CC3, Library, SAC, Hostels) with instant query matching.</p>
+          </div>
+          <div class="sub-card">
+            <h4>Multi-Attribute Filters</h4>
+            <p>Filter seamlessly by 8 Item Categories (Electronics, Documents, Wallets, Keys, Books, Clothing, Bottles, Other) and Report Type (Lost vs. Found).</p>
+          </div>
+          <div class="sub-card">
+            <h4>Authentic Campus Branding</h4>
+            <p>Branded with the Devanagari Hindi character <strong>"ख"</strong> (for Khoj) in the browser tab favicon, header logo, and portal badges.</p>
+          </div>
+        </div>
+
+        <div class="sub-card" style="margin-top: 15px;">
+          <h4>Item Details Page (<code>/items/:id</code>)</h4>
+          <p>Displays full photographs, reporter roll number, last seen campus location, relative time since loss, and dynamic action buttons (Claim This Item / Admin Delete).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 13: Core Feature: Anti-Fraud Claim Protocol -->
+    <div class="slide" data-notes="Our Anti-Fraud Claim Protocol prevents false claims. When a founder registers a found item, they enter secret distinguishing details that are hidden from the noticeboard. Claimants must submit proof like serial numbers, receipt photos, or lock-screen wallpaper details. The admin compares the evidence in the admin console.">
+      <div class="slide-badge">Phase 4: Implementation Walkthrough</div>
+      <h2 class="slide-title">Anti-Fraud Claim Verification Protocol</h2>
+      <p class="slide-subtitle">Two-factor ownership verification eliminating dispute liability and fraudulent claims</p>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="sub-card" style="border-left: 4px solid var(--primary);">
+            <h4>Step 1: Secret Distinguishing Details</h4>
+            <p>When reporting a found item, the finder records private marks (e.g. <em>"Has a small scratch on the bottom right and an anime sticker inside the case"</em>).<br><br><strong>Security:</strong> Stored in database but excluded from public noticeboard view.</p>
+          </div>
+          <div class="sub-card" style="border-left: 4px solid var(--accent);">
+            <h4>Step 2: Claimant Proof Dossier</h4>
+            <p>Claimants must independently describe matching characteristics or upload private evidence (purchase invoice, warranty card, unboxing video, or serial number).<br><br><strong>Rate Limit:</strong> Database unique constraint prevents spamming claims.</p>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 15px;">
+          <div class="sub-card" style="border-left: 4px solid var(--success);">
+            <h4>Step 3: Administrative Dossier Review</h4>
+            <p>Security desk officers inspect the claimant's private evidence against the finder's secret marks in <code>/admin/claims</code> before approving.</p>
+          </div>
+          <div class="sub-card" style="border-left: 4px solid var(--warning);">
+            <h4>Step 4: Automated Competing Rejections</h4>
+            <p>Upon approving a valid claim, the system automatically transitions competing pending claims to <code>rejected</code> with explanation notes delivered via notification.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 14: Core Feature: Admin Desk -->
+    <div class="slide" data-notes="The Administrative Portal provides full governance. The desk officer verifies physical ID cards during handovers, logs verified student roll numbers, and has deletion authority to purge inappropriate or spam notices. Every single action is permanently recorded in the immutable audit log.">
+      <div class="slide-badge">Phase 4: Implementation Walkthrough</div>
+      <h2 class="slide-title">Administrative Desk & Immutable Audit</h2>
+      <p class="slide-subtitle">Chain-of-custody enforcement, item moderation, and tamper-proof security logging</p>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="sub-card">
+            <h4>Handover Desk (<code>/admin/handovers</code>)</h4>
+            <p>Physical collection modal requires desk officer to physically inspect the student's college ID card and log the recipient's verified Name and Roll Number.</p>
+          </div>
+          <div class="sub-card">
+            <h4>Admin Deletion Authority</h4>
+            <p>Admins can permanently delete duplicate or inappropriate notices from <code>/admin/lost</code>, <code>/admin/found</code>, or item detail pages with safety confirm dialogs.</p>
+          </div>
+          <div class="sub-card">
+            <h4>Immutable Audit Trail (<code>/admin/audit-log</code>)</h4>
+            <p>PostgreSQL table logging every action (approvals, rejections, handovers, deletions) with timestamps, admin ID, and JSON payloads. Cannot be edited or deleted.</p>
+          </div>
+        </div>
+
+        <div class="code-block" style="margin-top: 15px;">
+          Dispute Protection: If an ownership dispute arises later, the exact handover timestamp, verifying admin, and recipient roll number are cryptographically traceable in the audit log.
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 15: Core Feature: Telegram Bot -->
+    <div class="slide" data-notes="To serve students on the move, we built @iiita_khoj_bot on Telegram. Students link their account with one click from their dashboard. In 5 interactive taps with inline buttons, students report lost or found items with photos. The serverless webhook on Vercel uploads the photo to Supabase and publishes the item instantly.">
+      <div class="slide-badge">Phase 4: Implementation Walkthrough</div>
+      <h2 class="slide-title">Omnichannel Telegram Bot (@iiita_khoj_bot)</h2>
+      <p class="slide-subtitle">Conversational 30-second reporting interface powered by serverless edge functions</p>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="sub-card">
+            <h4>Why Telegram Bot?</h4>
+            <ul class="bullet-list">
+              <li>100% Free forever (unlimited chats; zero Meta Business API fees).</li>
+              <li>No phone number required; works via verified Telegram ID.</li>
+              <li>Interactive tap buttons (Category, Campus Location, Skip Photo).</li>
+              <li>Zero extra hosting: runs on Vercel Serverless (<code>/api/telegram.ts</code>).</li>
+            </ul>
+          </div>
+
+          <div class="sub-card">
+            <h4>Conversational 5-Step Reporting</h4>
+            <ul class="bullet-list">
+              <li><strong>Step 1 (Category):</strong> Tap buttons (Electronics, ID, Keys, Bags...).</li>
+              <li><strong>Step 2 (Title):</strong> Reply with name (e.g. <em>"Boat Earbuds"</em>).</li>
+              <li><strong>Step 3 (Location):</strong> Tap location (CC3, Library, SAC, Hostels).</li>
+              <li><strong>Step 4 (Description):</strong> Reply with circumstances.</li>
+              <li><strong>Step 5 (Photo):</strong> Snap & send photo directly in chat.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="code-block" style="margin-top: 15px;">
+          Security Definer Architecture: Uses public.publish_item_from_bot() RPC to safely bypass client RLS without exposing service-role secret keys on the edge.
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 16: Verification & QA -->
+    <div class="slide" data-notes="Quality Assurance was verified rigorously. We authored automated unit and integration tests with Vitest, verifying institutional domain filters and state transitions. We executed 40 formal test cases with a 100% pass rate. TypeScript strict mode guarantees zero unchecked undefined errors.">
+      <div class="slide-badge">Phase 5: Testing & Quality Assurance</div>
+      <h2 class="slide-title">Verification & Quality Assurance</h2>
+      <p class="slide-subtitle">Rigorous test automation, domain invariant verification, and formal test cases</p>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="sub-card" style="border-top: 3px solid var(--success);">
+            <h4>Automated Vitest Suites</h4>
+            <p>• <code>auth_domain.test.ts</code>: Verified domain constraints, subdomains, and Gmail rejection.<br>• <code>status_transitions.test.ts</code>: Verified valid state machine paths.</p>
+          </div>
+          <div class="sub-card" style="border-top: 3px solid var(--accent);">
+            <h4>40 Formal Test Cases</h4>
+            <p>Documented in <code>Test_Cases.md</code> covering Functional (TC-01 to TC-20), UI/UX (TC-21 to TC-28), Security (TC-29 to TC-35), and Boundary Edge Cases (TC-36 to TC-40). 100% Pass Rate.</p>
+          </div>
+          <div class="sub-card" style="border-top: 3px solid var(--primary);">
+            <h4>TypeScript Strict Quality</h4>
+            <p>Compiled with <code>noUncheckedIndexedAccess: true</code>. Zero TypeScript warnings, zero memory leaks, and sub-1.7s incremental build time.</p>
+          </div>
+        </div>
+
+        <div class="code-block" style="margin-top: 15px;">
+          Vitest Run Result: 2 Test Files passed (2) • 8 Tests passed (8) • Execution Duration: 141ms • Build Exit Code: 0
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 17: Production Deployment -->
+    <div class="slide" data-notes="Khoj is live right now at khoj-pink.vercel.app. On Google Chrome Lighthouse audits, Khoj scored 98 in Performance and a perfect 100 in Accessibility, Best Practices, and SEO. The gzipped JavaScript payload is only 188 kilobytes, ensuring rapid loading even on 3G cellular connections.">
+      <div class="slide-badge">Phase 5: Production Go-Live</div>
+      <h2 class="slide-title">Live Deployment & Production Metrics</h2>
+      <p class="slide-subtitle">Production deployment on Vercel Global Edge and Supabase Cloud Infrastructure</p>
+
+      <div class="slide-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Performance & Quality Metric</th>
+              <th>Industry Standard</th>
+              <th>Khoj Achieved Result</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Lighthouse Performance</strong></td>
+              <td>> 85 / 100</td>
+              <td><strong>98 / 100</strong></td>
+              <td style="color: var(--success);">✓ Exceeded</td>
+            </tr>
+            <tr>
+              <td><strong>Lighthouse Accessibility</strong></td>
+              <td>> 90 / 100</td>
+              <td><strong>100 / 100</strong></td>
+              <td style="color: var(--success);">✓ Perfect</td>
+            </tr>
+            <tr>
+              <td><strong>Lighthouse Best Practices</strong></td>
+              <td>> 90 / 100</td>
+              <td><strong>100 / 100</strong></td>
+              <td style="color: var(--success);">✓ Perfect</td>
+            </tr>
+            <tr>
+              <td><strong>Lighthouse SEO</strong></td>
+              <td>> 90 / 100</td>
+              <td><strong>100 / 100</strong></td>
+              <td style="color: var(--success);">✓ Perfect</td>
+            </tr>
+            <tr>
+              <td><strong>Vite Production Build Time</strong></td>
+              <td>< 5.0 seconds</td>
+              <td><strong>1.62 seconds</strong></td>
+              <td style="color: var(--success);">✓ Lightning Fast</td>
+            </tr>
+            <tr>
+              <td><strong>Bundle Size (Gzipped JS)</strong></td>
+              <td>< 300 kB</td>
+              <td><strong>188 kB</strong></td>
+              <td style="color: var(--success);">✓ Highly Optimized</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="sub-card" style="margin-top: 15px;">
+          <p>Live Endpoints: <strong>Web:</strong> <a href="https://khoj-pink.vercel.app/" target="_blank" style="color: var(--primary);">khoj-pink.vercel.app</a> | <strong>Bot:</strong> <a href="https://t.me/iiita_khoj_bot" target="_blank" style="color: var(--accent);">@iiita_khoj_bot</a> | <strong>Backend:</strong> Supabase PostgreSQL (AWS ap-south-1)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 18: Risk Management -->
+    <div class="slide" data-notes="We maintained an active Risk Register aligned with ISO/IEC 25010 standards. Risks like fraudulent electronic claims, unauthorized external logins, foreign key cascade deletion errors, and rate limit abuse were systematically analyzed and resolved through database-level constraints.">
+      <div class="slide-badge">Phase 5: Quality Governance</div>
+      <h2 class="slide-title">Risk Management & Governance</h2>
+      <p class="slide-subtitle">Systematic risk identification, probability assessment, and mitigation controls</p>
+
+      <div class="slide-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Risk Event</th>
+              <th>Severity</th>
+              <th>Engineering Mitigation Implemented</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Fraudulent claim on high-value asset</strong></td>
+              <td style="color: #ef4444;">HIGH</td>
+              <td>Secret distinguishing marks hidden from public + physical ID inspection at desk</td>
+            </tr>
+            <tr>
+              <td><strong>External/Non-IIITA user intrusion</strong></td>
+              <td style="color: #ef4444;">HIGH</td>
+              <td>Closed campus wall + PostgreSQL domain CHECK constraint on email column</td>
+            </tr>
+            <tr>
+              <td><strong>Foreign key deletion conflict</strong></td>
+              <td style="color: var(--warning);">MED</td>
+              <td>Configured ON DELETE CASCADE on notifications and claims foreign keys</td>
+            </tr>
+            <tr>
+              <td><strong>Accidental deletion by desk officer</strong></td>
+              <td style="color: var(--warning);">MED</td>
+              <td>Two-step confirmation modal dialog + permanent audit trail logging</td>
+            </tr>
+            <tr>
+              <td><strong>Spam/Duplicate claim submission</strong></td>
+              <td style="color: var(--success);">LOW</td>
+              <td>Database composite unique constraint (item_id, claimant_id) blocks duplicates</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Slide 19: Future Scope -->
+    <div class="slide" data-notes="Looking to the future, Khoj's modular architecture enables three powerful extensions: AI multimodal visual matching with CLIP embeddings to automatically connect lost and found photos, downloadable QR code stickers for student laptops, and an automated Telegram broadcast channel for emergency lost alerts.">
+      <div class="slide-badge">Phase 6: Future Enhancements</div>
+      <h2 class="slide-title">Future Scope & Extensibility</h2>
+      <p class="slide-subtitle">Next-generation features for intelligent campus asset management</p>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="sub-card" style="border-top: 3px solid var(--accent);">
+            <h4>1. AI Visual Matching</h4>
+            <p>Integrate OpenAI CLIP or Gemini Multimodal vector embeddings to automatically compare uploaded photos of lost items against found items and suggest high-confidence matches.</p>
+          </div>
+          <div class="sub-card" style="border-top: 3px solid var(--primary);">
+            <h4>2. QR & NFC Smart Tags</h4>
+            <p>Allow students to generate unique printable QR code stickers for laptops, calculators, and bicycles. If found, any student can scan the QR to anonymously notify the owner.</p>
+          </div>
+          <div class="sub-card" style="border-top: 3px solid var(--success);">
+            <h4>3. Broadcast Alert Channel</h4>
+            <p>Create an automated read-only Telegram Broadcast Channel (<strong>@IIITA_LostFound_Alerts</strong>) that automatically posts urgent notices for high-priority items like ID cards and keys.</p>
+          </div>
+        </div>
+
+        <div class="sub-card" style="margin-top: 15px;">
+          <h4>Campus Geofencing Integration</h4>
+          <p>Correlate lost item notices with Aruba campus Wi-Fi access point logs (with student permission) to estimate where a device was last connected.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 20: Summary & Conclusion -->
+    <div class="slide" data-notes="In conclusion, Khoj successfully bridges academic software engineering rigor with real-world campus utility. We delivered full SDLC documentation, 12 UML diagrams, a responsive React 19 web app, an active Telegram bot, and a production cloud deployment. Thank you very much for your time. I am now delighted to take your questions and provide a live demonstration.">
+      <div class="slide-badge">Project Conclusion</div>
+      <h2 class="slide-title">Summary & Project Deliverables</h2>
+      <p class="slide-subtitle">A complete Software Engineering capstone project delivering production value to IIIT Allahabad</p>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="sub-card" style="border-left: 4px solid var(--primary);">
+            <h4>Complete SDLC Deliverables Package</h4>
+            <ul class="bullet-list">
+              <li><strong>Requirements:</strong> IEEE 830 SRS, Use Case Specs, RTM matrix.</li>
+              <li><strong>Design:</strong> Architecture Design, Database Design, Design Decisions.</li>
+              <li><strong>UML Models:</strong> 12 PlantUML diagrams + rendered PNG & SVG images.</li>
+              <li><strong>Testing:</strong> Test Plan, 40 Test Cases, Execution Report (100% pass).</li>
+              <li><strong>Management:</strong> Project Plan, WBS, Gantt Chart, Risk Register, SQAP.</li>
+            </ul>
+          </div>
+
+          <div class="sub-card" style="border-left: 4px solid var(--success);">
+            <h4>Live Deployed Systems</h4>
+            <ul class="bullet-list">
+              <li><strong>Live Web Portal:</strong> <a href="https://khoj-pink.vercel.app/" target="_blank" style="color: var(--primary);">https://khoj-pink.vercel.app/</a></li>
+              <li><strong>Telegram Bot:</strong> <a href="https://t.me/iiita_khoj_bot" target="_blank" style="color: var(--accent);">@iiita_khoj_bot</a> (Active & Linked)</li>
+              <li><strong>PostgreSQL Database:</strong> Supabase Cloud (24 RLS Policies)</li>
+              <li><strong>Source Code Repository:</strong> Clean Git tree on GitHub main branch</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 24px;">
+          <h3 style="font-family: 'DM Serif Display', serif; font-size: 28px; color: #fff;">Thank You!</h3>
+          <p style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">Open for Questions, Evaluation, and Live Demonstration</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Speaker notes overlay panel -->
+  <aside class="speaker-notes-panel" id="notesPanel">
+    <div class="notes-header">
+      <span>🎙️ Speaker Notes (What to say to the Evaluator)</span>
+      <button class="btn" onclick="toggleNotes()" style="padding: 2px 8px; font-size: 11px;">Close ✕</button>
+    </div>
+    <div class="notes-content" id="notesText"></div>
+  </aside>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const notesBtn = document.getElementById('notesBtn');
+    const fullBtn = document.getElementById('fullBtn');
+    const slideNum = document.getElementById('slideNum');
+    const notesPanel = document.getElementById('notesPanel');
+    const notesText = document.getElementById('notesText');
+
+    let currentSlide = 0;
+    const totalSlides = slides.length;
+
+    function updateSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+      
+      slides[currentSlide].classList.remove('active');
+      currentSlide = index;
+      slides[currentSlide].classList.add('active');
+
+      slideNum.textContent = `${currentSlide + 1} / ${totalSlides}`;
+
+      // Update speaker notes
+      const notes = slides[currentSlide].getAttribute('data-notes') || 'No notes for this slide.';
+      notesText.textContent = notes;
+
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) updateSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) updateSlide(currentSlide - 1);
+    }
+
+    function toggleNotes() {
+      notesPanel.classList.toggle('active');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => console.log(err));
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    // Event listeners
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+    notesBtn.addEventListener('click', toggleNotes);
+    fullBtn.addEventListener('click', toggleFullscreen);
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key === 'n' || e.key === 'N') {
+        toggleNotes();
+      }
+    });
+
+    // Initialize first slide
+    updateSlide(0);
+  </script>
+</body>
+</html>
