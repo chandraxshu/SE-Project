@@ -164,8 +164,8 @@ CREATE TABLE public.notifications (
                                   'claim_approved', 'claim_rejected', 'admin_message',
                                   'item_returned', 'new_claim', 'general'
                                 )),
-  related_item_id   UUID        REFERENCES public.items(id),
-  related_claim_id  UUID        REFERENCES public.claims(id),
+  related_item_id   UUID        REFERENCES public.items(id) ON DELETE CASCADE,
+  related_claim_id  UUID        REFERENCES public.claims(id) ON DELETE CASCADE,
   is_read           BOOLEAN     DEFAULT false,
   created_at        TIMESTAMPTZ DEFAULT now()
 );
@@ -404,6 +404,12 @@ CREATE POLICY "notifications: admins can insert"
   ON public.notifications FOR INSERT
   TO authenticated
   WITH CHECK (public.is_admin());
+
+-- Admins can delete notifications
+CREATE POLICY "notifications: admins can delete"
+  ON public.notifications FOR DELETE
+  TO authenticated
+  USING (public.is_admin());
 
 -- ----------------------------------------------------------------------------
 -- audit_logs policies

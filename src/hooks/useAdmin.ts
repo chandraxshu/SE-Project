@@ -529,7 +529,13 @@ export function useAdmin() {
           },
         });
 
-        // 2. Delete item
+        // 2. Clean up any related notifications first
+        await supabase
+          .from('notifications')
+          .delete()
+          .eq('related_item_id', itemId);
+
+        // 3. Delete item
         const { error: deleteError } = await supabase
           .from('items')
           .delete()
