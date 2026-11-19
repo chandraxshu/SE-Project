@@ -495,22 +495,27 @@ export default async function handler(req: any, res: any) {
 
         let photoUrl: string | null = null;
         if (fileJson.ok && fileJson.result?.file_path) {
-          const downloadUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileJson.result.file_path}`;
-          const imgBlob = await (await fetch(downloadUrl)).arrayBuffer();
+          try {
+            const downloadUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileJson.result.file_path}`;
+            const imgRes = await fetch(downloadUrl);
+            const imgBuffer = Buffer.from(await imgRes.arrayBuffer());
 
-          const fileName = `telegram_${Date.now()}.jpg`;
-          const { error: uploadError } = await supabase.storage
-            .from('item-photos')
-            .upload(fileName, imgBlob, {
-              contentType: 'image/jpeg',
-              upsert: false,
-            });
+            const fileName = `telegram_${Date.now()}.jpg`;
+            const { error: uploadError } = await supabase.storage
+              .from('item-photos')
+              .upload(fileName, imgBuffer, {
+                contentType: 'image/jpeg',
+                upsert: false,
+              });
 
-          if (!uploadError) {
-            const { data: urlData } = supabase.storage.from('item-photos').getPublicUrl(fileName);
-            photoUrl = urlData.publicUrl;
-          } else {
-            console.error('Storage upload error:', uploadError.message);
+            if (!uploadError) {
+              const { data: urlData } = supabase.storage.from('item-photos').getPublicUrl(fileName);
+              photoUrl = urlData.publicUrl;
+            } else {
+              console.error('Storage upload error:', uploadError.message);
+            }
+          } catch (storageErr) {
+            console.error('Error processing photo:', storageErr);
           }
         }
 
@@ -548,24 +553,44 @@ async function publishItem(
     const location = data.location || 'IIIT Allahabad Campus';
     const description = data.description || 'Reported via Khoj Telegram Bot';
 
-    const { data: newItem, error: insertError } = await supabase
-      .from('items')
-      .insert({
-        title,
-        category,
-        location,
-        description,
-        report_type: reportType,
-        status: 'active',
-        reported_by: userId,
-        photo_url: photoUrl,
-        date_occurred: new Date().toISOString().split('T')[0],
-      })
-      .select('id')
-      .single();
+    // 1. Try calling publish_item_from_bot RPC (Security Definer)
+    const { data: rpcItemId, error: rpcError } = await supabase.rpc('publish_item_from_bot', {
+      p_user_id: userId,
+      p_title: title,
+      p_category: category,
+      p_location: location,
+      p_description: description,
+      p_report_type: reportType,
+      p_photo_url: photoUrl,
+    });
 
-    if (insertError) {
-      throw new Error(insertError.message);
+    let itemId = rpcItemId;
+
+    // 2. Fallback to direct insert if RPC not created yet
+    if (rpcError || !itemId) {
+      if (rpcError) {
+        console.warn('RPC publish_item_from_bot error:', rpcError.message);
+      }
+      const { data: newItem, error: insertError } = await supabase
+        .from('items')
+        .insert({
+          title,
+          category,
+          location,
+          description,
+          report_type: reportType,
+          status: 'active',
+          reported_by: userId,
+          photo_url: photoUrl,
+          date_occurred: new Date().toISOString().split('T')[0],
+        })
+        .select('id')
+        .single();
+
+      if (insertError) {
+        throw new Error(insertError.message || rpcError?.message || 'Database insert failed');
+      }
+      itemId = newItem.id;
     }
 
     // Reset session
@@ -573,7 +598,7 @@ async function publishItem(
 
     const typeEmoji = reportType === 'found' ? '🟢' : '🔴';
     const typeLabel = reportType === 'found' ? 'Found Item' : 'Lost Item';
-    const itemUrl = `${APP_URL}/items/${newItem.id}`;
+    const itemUrl = `${APP_URL}/items/${itemId}`;
 
     await sendMessage(
       chatId,
@@ -592,11 +617,11 @@ async function publishItem(
       }
     );
   } catch (err) {
-    console.error('Failed to publish item:', err);
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error('Failed to publish item:', errorMsg);
     await sendMessage(
       chatId,
-      '❌ *Failed to publish notice.* Please try again later or post directly on the website:\n' +
-      `${APP_URL}/browse`,
+      `❌ *Failed to publish notice:* ${errorMsg}\n\nPlease try again later or post directly on the website:\n${APP_URL}/browse`,
       getMainMenuKeyboard()
     );
   }

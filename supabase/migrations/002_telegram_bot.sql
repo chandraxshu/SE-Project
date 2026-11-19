@@ -74,3 +74,59 @@ BEGIN
   );
 END;
 $$;
+
+-- 4. Security definer function to publish an item from the Telegram bot
+CREATE OR REPLACE FUNCTION public.publish_item_from_bot(
+  p_user_id     UUID,
+  p_title       TEXT,
+  p_category    TEXT,
+  p_location    TEXT,
+  p_description TEXT,
+  p_report_type TEXT,
+  p_photo_url   TEXT DEFAULT NULL
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_item_id UUID;
+BEGIN
+  -- Verify the student profile exists
+  IF NOT EXISTS (SELECT 1 FROM public.profiles WHERE id = p_user_id) THEN
+    RAISE EXCEPTION 'Student profile not found';
+  END IF;
+
+  INSERT INTO public.items (
+    title,
+    category,
+    location,
+    description,
+    report_type,
+    status,
+    reported_by,
+    photo_url,
+    date_occurred
+  ) VALUES (
+    p_title,
+    LOWER(p_category),
+    p_location,
+    p_description,
+    LOWER(p_report_type),
+    'active',
+    p_user_id,
+    p_photo_url,
+    CURRENT_DATE
+  ) RETURNING id INTO v_item_id;
+
+  RETURN v_item_id;
+END;
+$$;
+
+-- 5. Allow bot photo uploads into item-photos bucket
+DROP POLICY IF EXISTS "item-photos: bot upload" ON storage.objects;
+CREATE POLICY "item-photos: bot upload"
+  ON storage.objects FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (bucket_id = 'item-photos');
