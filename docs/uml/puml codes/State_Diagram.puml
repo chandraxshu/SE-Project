@@ -1,10 +1,20 @@
 @startuml
 title State Machine Diagram: Item Lifecycle & Claim Lifecycle
 
+hide empty description
 skinparam shadowing false
 skinparam defaultFontName Arial
+skinparam state {
+  BackgroundColor #F8FAFC
+  BorderColor #2563EB
+  ArrowColor #1D4ED8
+  StartColor #16A34A
+  EndColor #DC2626
+}
 
-state "Item Lifecycle" as ItemState {
+[*] --> Active
+
+state "Item Lifecycle" as ItemLifecycle {
   [*] --> Active : Reporter submits found/lost report
   
   Active : Item is publicly visible on noticeboard
@@ -25,12 +35,10 @@ state "Item Lifecycle" as ItemState {
   Archived --> [*]
 }
 
---
-
-state "Claim Lifecycle" as ClaimState {
+state "Claim Lifecycle" as ClaimLifecycle {
   [*] --> PendingReview : Student submits ownership claim
   
-  PendingReview : Awaiting administrative dossier review
+  PendingReview : Awaiting administrative review
   PendingReview : Proof details kept confidential
   
   PendingReview --> Approved : Admin approves proof
@@ -43,11 +51,11 @@ state "Claim Lifecycle" as ClaimState {
   PendingReview --> Rejected : Automatically rejected when another claim is approved
   Rejected : Review note provided to student
   
-  AwaitingHandover --> Returned : Physical handover confirmed at desk
-  Returned : Recipient roll number recorded in audit log
+  AwaitingHandover --> ClaimResolved : Physical handover confirmed at desk
+  ClaimResolved : Recipient roll number recorded in audit log
   
   Rejected --> [*]
-  Returned --> [*]
+  ClaimResolved --> [*]
 }
 
 @enduml
